@@ -738,6 +738,133 @@ def get_compliance_report():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@app.route("/api/seed")
+def seed_data():
+    # Clear existing data to avoid duplicates or messy database if requested
+    db._execute("DELETE FROM audit_logs")
+    db._execute("DELETE FROM expenses")
+    
+    # Reset department spent_budget first
+    db._execute("UPDATE departments SET spent_budget = 0")
+    
+    import random
+    import datetime
+    
+    names = [
+        "Oliver Bennett", "Sophia Chen", "Marcus Vance", "Elena Rostova", "Amara Diallo",
+        "Kenji Tanaka", "Isabella Torres", "Liam Gallagher", "Zara Patel", "Connor McDavid",
+        "Maya Lin", "Diego Silva", "Fatima Al-Sayed", "Lucas Dupont", "Aria Montgomery",
+        "Xavier Johnson", "Chloe Jenkins", "Gabriel Martin", "Emma Watson", "Jackson Reed"
+    ]
+    
+    depts = [
+        (1, "Engineering"),
+        (2, "Marketing"),
+        (3, "HR"),
+        (4, "Finance"),
+        (5, "Operations")
+    ]
+    
+    categories = [
+        "software", "hardware", "travel", "marketing", "office", "training"
+    ]
+    
+    vendors = {
+        "software": ["AWS", "Slack", "Zoom", "Github", "Salesforce", "Notion", "Figma", "Stripe"],
+        "hardware": ["Dell", "Apple Store", "Lenovo", "Cisco", "HP"],
+        "travel": ["Uber", "Delta Airlines", "Marriott", "Hilton", "Expedia"],
+        "marketing": ["Google Ads", "Facebook Ads", "LinkedIn Ads", "Hubspot"],
+        "office": ["Staples", "Amazon", "Target", "Office Depot"],
+        "training": ["Udemy", "Coursera", "Pluralsight", "LinkedIn Learning"]
+    }
+    
+    descriptions = {
+        "software": "Monthly subscription for team productivity and tools",
+        "hardware": "Upgraded workstation and accessories for development",
+        "travel": "Lodging and transport for annual team summit",
+        "marketing": "Ad campaign budget for Q2 product launch",
+        "office": "Refill pantry, stationery, and standing desk converters",
+        "training": "Professional certification training course for team members"
+    }
+
+    # Generate 20 records
+    base_time = datetime.datetime.utcnow()
+    for i in range(20):
+        name = names[i]
+        dept_id, dept_name = depts[i % len(depts)]
+        category = categories[i % len(categories)]
+        vendor = random.choice(vendors[category])
+        desc = descriptions[category]
+        amount = round(random.uniform(50.0, 4500.0), 2)
+        
+        # Adjust some values to be very high for realistic warnings
+        if i in [3, 7, 14]:
+            amount = round(random.uniform(5000.0, 8500.0), 2)
+            
+        # Determine status
+        if i in [3, 9, 13]: # 3 rejections
+            status = "REJECTED"
+            risk_level = "HIGH"
+            approved_by = "Policy Checker"
+            note = "REJECTED: Violation of spending threshold or unknown vendor."
+        elif i in [2, 6, 11, 17]: # 4 pending
+            status = "PENDING"
+            risk_level = "MEDIUM" if amount > 1000 else "LOW"
+            approved_by = None
+            note = None
+        else: # 13 approved
+            status = "APPROVED"
+            risk_level = "LOW" if amount < 2000 else "MEDIUM"
+            approved_by = "Approval Notifier"
+            note = "Approved automatically by budget and policy guidelines."
+            
+        expense_id = f"EXP-{100000 + i:06X}"
+        created_at = (base_time - datetime.timedelta(days=i, hours=random.randint(1, 23))).isoformat()
+        
+        # Deduct budget for approved ones
+        if status == "APPROVED":
+            db._execute("UPDATE departments SET spent_budget = spent_budget + ?", (amount, dept_id))
+            
+        db._execute("""
+            INSERT INTO expenses 
+            (id, requester, amount, department_id, department_name, category, vendor, 
+             description, status, risk_level, approved_by, note, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (expense_id, name, amount, dept_id, dept_name, category, vendor,
+              desc, status, risk_level, approved_by, note, created_at, created_at))
+              
+        # Insert audit logs
+        db._execute("""
+            INSERT INTO audit_logs (expense_id, agent_name, action, details, timestamp)
+            VALUES (?, ?, ?, ?, ?)
+        """, (expense_id, "Budget Checker", "PASSED", f"Available budget verified for {dept_name}", created_at))
+        
+        if status == "APPROVED":
+            db._execute("""
+                INSERT INTO audit_logs (expense_id, agent_name, action, details, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+            """, (expense_id, "Policy Checker", "PASSED", f"Category and vendor validated successfully", created_at))
+            db._execute("""
+                INSERT INTO audit_logs (expense_id, agent_name, action, details, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+            """, (expense_id, "Risk Analyzer", "PASSED", f"No suspicious patterns or duplicate filings found", created_at))
+            db._execute("""
+                INSERT INTO audit_logs (expense_id, agent_name, action, details, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+            """, (expense_id, "Approval Notifier", "APPROVED", f"Auto-approved. Budget deducted from {dept_name}", created_at))
+        elif status == "REJECTED":
+            db._execute("""
+                INSERT INTO audit_logs (expense_id, agent_name, action, details, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+            """, (expense_id, "Policy Checker", "REJECTED", f"Rejected: Violation of spending threshold or unknown vendor.", created_at))
+            db._execute("""
+                INSERT INTO audit_logs (expense_id, agent_name, action, details, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+            """, (expense_id, "Approval Notifier", "REJECTED", f"Auto-rejected due to policy checker flag.", created_at))
+
+    return jsonify({"success": True, "message": "Seeded 20 diverse realistic expenses and audit logs successfully."})
+
+
 @app.route("/api/override/<expense_id>", methods=["POST"])
 def override_expense(expense_id):
     import tools
