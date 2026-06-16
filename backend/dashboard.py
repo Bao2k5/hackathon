@@ -651,7 +651,9 @@ def debug_env():
         "BAND_BOT_TOKEN": bool(os.getenv("BAND_BOT_TOKEN")),
         "AGENT_CONFIG_B64": bool(os.getenv("AGENT_CONFIG_B64")),
         "B64_DECODE_ERR": b64_err,
-        "CONFIG_PARSED": config is not None
+        "CONFIG_PARSED": config is not None,
+        "DATABASE_URL": bool(os.getenv("DATABASE_URL")),
+        "IS_POSTGRES": db.IS_POSTGRES
     })
 
 @app.route("/api/test-band")
