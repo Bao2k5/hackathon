@@ -517,9 +517,14 @@ def _trigger_band(expense_result: dict, data: dict):
     # Load agent config to use approval_notifier API key for sending messages
     # This avoids the "Human API requires Enterprise plan" restriction.
     try:
-        config_path = os.path.join(PROJECT_ROOT, "agent_config.yaml")
-        with open(config_path) as f:
-            config = yaml.safe_load(f)
+        import base64
+        b64_config = os.getenv("AGENT_CONFIG_B64")
+        if b64_config:
+            config = yaml.safe_load(base64.b64decode(b64_config).decode("utf-8"))
+        else:
+            config_path = os.path.join(PROJECT_ROOT, "agent_config.yaml")
+            with open(config_path) as f:
+                config = yaml.safe_load(f)
         agent_key = config["approval_notifier"]["api_key"]
     except Exception as e:
         print(f"[Dashboard] Failed to load agent key: {e}")

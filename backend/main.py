@@ -46,9 +46,20 @@ OPENAI_API_KEY  = os.getenv("OPENAI_API_KEY", "")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME      = os.getenv("MODEL_NAME", "gpt-4o-mini")
 
-CONFIG_PATH = os.path.join(PROJECT_ROOT, "agent_config.yaml")
-with open(CONFIG_PATH) as f:
-    CONFIG = yaml.safe_load(f)
+import base64
+def get_config():
+    b64_config = os.getenv("AGENT_CONFIG_B64")
+    if b64_config:
+        try:
+            return yaml.safe_load(base64.b64decode(b64_config).decode("utf-8"))
+        except Exception as e:
+            print(f"[WARN] Failed to load config from B64: {e}")
+            
+    config_path = os.path.join(PROJECT_ROOT, "agent_config.yaml")
+    with open(config_path) as f:
+        return yaml.safe_load(f)
+
+CONFIG = get_config()
 
 
 def make_llm():
