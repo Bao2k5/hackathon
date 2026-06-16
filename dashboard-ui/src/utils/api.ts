@@ -54,7 +54,7 @@ export async function fetchInvoicesFromApi(): Promise<Invoice[]> {
       aiFlags,
       approvedBy: item.approved_by || undefined,
       approvedAt: item.updated_at || undefined,
-      receiptUrl: `https://example.com/receipts/${item.id}.pdf`,
+      receiptUrl: item.receipt_url || undefined,
       notes: item.note || undefined,
     };
   });
@@ -95,6 +95,7 @@ export async function submitExpenseToApi(payload: {
   category: string;
   vendor: string;
   description: string;
+  receiptData?: string | null;
 }): Promise<{ success: boolean; expense_id?: string; error?: string }> {
   const res = await fetch('/api/submit', {
     method: 'POST',

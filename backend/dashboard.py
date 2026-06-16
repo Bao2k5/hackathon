@@ -488,6 +488,19 @@ def index():
 @app.route("/api/submit", methods=["POST"])
 def submit_expense():
     data = request.get_json()
+    receipt_data = data.get("receiptData")
+    receipt_url = None
+    
+    if receipt_data and os.getenv("CLOUDINARY_URL"):
+        try:
+            import cloudinary
+            import cloudinary.uploader
+            # Base64 string looks like: "data:image/png;base64,iVBORw0KGgo..."
+            upload_result = cloudinary.uploader.upload(receipt_data)
+            receipt_url = upload_result.get("secure_url")
+        except Exception as e:
+            print(f"[Dashboard] Failed to upload receipt to Cloudinary: {e}")
+
     try:
         result = db.create_expense(
             requester=data["requester"],
@@ -496,15 +509,16 @@ def submit_expense():
             category=data["category"],
             vendor=data["vendor"],
             description=data["description"],
+            receipt_url=receipt_url
         )
         # Trigger Band message to Budget Checker
-        _trigger_band(result, data)
+        _trigger_band(result, data, receipt_url)
         return jsonify({"success": True, "expense_id": result["expense_id"]})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
 
 
-def _trigger_band(expense_result: dict, data: dict):
+def _trigger_band(expense_result: dict, data: dict, receipt_url: str = None):
     """Send a message to the Band room to kick off the agent pipeline."""
     import yaml
     from thenvoi_rest import RestClient, ChatMessageRequest, ChatMessageRequestMentionsItem
@@ -540,8 +554,11 @@ def _trigger_band(expense_result: dict, data: dict):
         f"Vendor      : {data['vendor']}\n"
         f"Description : {data['description']}\n"
         f"Budget Left : ${expense_result['remaining_budget']:,.2f}\n"
-        f"Please perform budget check and hand off to @Policy Checker."
     )
+    if receipt_url:
+        message += f"Receipt URL : {receipt_url}\n"
+        
+    message += f"Please perform budget check and hand off to @Policy Checker."
     try:
         client = RestClient(api_key=agent_key, base_url="https://app.band.ai")
         client.agent_api_messages.create_agent_chat_message(

@@ -123,6 +123,7 @@ export default function App() {
     category: string;
     vendor: string;
     description: string;
+    receiptData?: string | null;
   }) => {
     if (useLiveApi) {
       const res = await submitExpenseToApi(data);

@@ -13,6 +13,7 @@ type SubmitExpenseModalProps = {
     category: string;
     vendor: string;
     description: string;
+    receiptData?: string | null;
   }) => Promise<boolean>;
   departments: Department[];
   defaultRequester?: string;
@@ -41,6 +42,7 @@ export default function SubmitExpenseModal({
   const [category, setCategory] = useState('software');
   const [vendor, setVendor] = useState('');
   const [description, setDescription] = useState('');
+  const [receiptData, setReceiptData] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -79,6 +81,7 @@ export default function SubmitExpenseModal({
         category,
         vendor,
         description,
+        receiptData,
       });
 
       if (ok) {
@@ -88,6 +91,7 @@ export default function SubmitExpenseModal({
           setAmount('');
           setVendor('');
           setDescription('');
+          setReceiptData(null);
           onClose();
         }, 1500);
       } else {
@@ -264,6 +268,30 @@ export default function SubmitExpenseModal({
                   rows={3}
                   className="w-full bg-white/5 border border-border/10 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-accent/30 focus:bg-white/10 transition-all-200"
                   required
+                />
+              </div>
+
+              {/* Receipt File */}
+              <div>
+                <label className="text-[10px] text-foreground/50 font-medium uppercase tracking-wider mb-1 block">
+                  Receipt Image (Optional)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setReceiptData(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    } else {
+                      setReceiptData(null);
+                    }
+                  }}
+                  className="w-full bg-white/5 border border-border/10 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-accent/30 focus:bg-white/10 transition-all-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20 cursor-pointer"
                 />
               </div>
 

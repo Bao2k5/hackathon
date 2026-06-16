@@ -56,6 +56,7 @@ def init_db():
             risk_level VARCHAR(255),
             approved_by VARCHAR(255),
             note TEXT,
+            receipt_url TEXT,
             created_at VARCHAR(255) NOT NULL,
             updated_at VARCHAR(255) NOT NULL
         );
@@ -109,6 +110,7 @@ def init_db():
             risk_level TEXT,
             approved_by TEXT,
             note TEXT,
+            receipt_url TEXT,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
         );

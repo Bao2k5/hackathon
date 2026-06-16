@@ -28,6 +28,7 @@ type InvoicesPageProps = {
     category: string;
     vendor: string;
     description: string;
+    receiptData?: string | null;
   }) => Promise<boolean>;
 };
 
