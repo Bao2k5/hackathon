@@ -823,7 +823,7 @@ def seed_data():
         
         # Deduct budget for approved ones
         if status == "APPROVED":
-            db._execute("UPDATE departments SET spent_budget = spent_budget + ?", (amount, dept_id))
+            db._execute("UPDATE departments SET spent_budget = spent_budget + ? WHERE id=?", (amount, dept_id))
             
         db._execute("""
             INSERT INTO expenses 
