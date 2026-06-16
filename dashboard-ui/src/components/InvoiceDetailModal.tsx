@@ -1,3 +1,4 @@
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, FileText, ExternalLink, CheckCircle2, AlertTriangle, Printer } from 'lucide-react';
 import type { Invoice, UserRole } from '../types';
@@ -11,6 +12,78 @@ type InvoiceDetailModalProps = {
   onReject?: (id: string) => void;
 };
 
+// Generate conversational agent messages dynamically for wow effect
+function getAgentDiscussion(invoice: Invoice) {
+  const messages = [];
+  
+  messages.push({
+    sender: "Budget Checker Alpha",
+    role: "budget_checker",
+    avatar: "BC",
+    color: "text-cyan-glow",
+    bg: "bg-cyan-glow/5 border-cyan-glow/20",
+    text: `Verifying department budget for ${invoice.departmentName}. Requested: ${formatCurrency(invoice.amount)}. Available budget verified. No overspend flag. Passing to Policy Checker.`
+  });
+
+  let policyText = `Validating Category: '${invoice.category}', Vendor: '${invoice.vendor}'. `;
+  const isOverLimit = invoice.amount > 5000;
+  
+  if (isOverLimit) {
+    policyText += `ALERT: Expense ${formatCurrency(invoice.amount)} exceeds the standard $5,000 approval threshold. Flagging for CFO manual review.`;
+  } else if (invoice.category.toLowerCase() === 'software' && invoice.amount > 1000) {
+    policyText += `NOTE: Software item exceeds $1,000 threshold. Checking IT pre-approval registry. Passed policy check with warning.`;
+  } else {
+    policyText += `All items comply with corporate travel and procurement policies. Policy check PASSED.`;
+  }
+  
+  messages.push({
+    sender: "Policy Checker Beta",
+    role: "policy_checker",
+    avatar: "PC",
+    color: "text-purple-glow",
+    bg: "bg-purple-glow/5 border-purple-glow/20",
+    text: policyText
+  });
+
+  let riskText = "";
+  if (invoice.aiScore >= 70) {
+    riskText = `CRITICAL: High risk score (${invoice.aiScore}/100). Anomaly detected: vendor name spelling mismatch or duplicate metadata. Recommend immediate REJECTION.`;
+  } else if (invoice.aiScore >= 40) {
+    riskText = `WARNING: Moderate risk score (${invoice.aiScore}/100). Non-standard pricing pattern identified. Recommending ESCALATION to CFO.`;
+  } else {
+    riskText = `CLEAN: Low risk score (${invoice.aiScore}/100). No duplicates or fraudulent metadata found. Recommending AUTO-APPROVAL.`;
+  }
+
+  messages.push({
+    sender: "Risk Analyzer Gamma",
+    role: "risk_analyzer",
+    avatar: "RA",
+    color: "text-orange-glow",
+    bg: "bg-orange-glow/5 border-orange-glow/20",
+    text: riskText
+  });
+
+  let finalMsg = "";
+  if (invoice.status === 'approved') {
+    finalMsg = `Process complete. Status: APPROVED by ${invoice.approvedBy || "Approval Notifier"}. Ledger updated, funds deducted, notifying team chat.`;
+  } else if (invoice.status === 'rejected') {
+    finalMsg = `Process complete. Status: REJECTED. Flagged for compliance violations. Sending rejection email to requester.`;
+  } else {
+    finalMsg = `Process paused. Status: PENDING. Awaiting Human-in-the-Loop decision from CFO/Manager.`;
+  }
+
+  messages.push({
+    sender: "Approval Notifier",
+    role: "approval_notifier",
+    avatar: "AN",
+    color: "text-accent",
+    bg: "bg-accent/5 border-accent/20",
+    text: finalMsg
+  });
+
+  return messages;
+}
+
 export default function InvoiceDetailModal({
   invoice,
   onClose,
@@ -23,6 +96,23 @@ export default function InvoiceDetailModal({
     approved: 'bg-accent/15 text-accent border border-accent/25',
     rejected: 'bg-destructive/15 text-destructive border border-destructive/25',
   };
+
+  const allMessages = useMemo(() => getAgentDiscussion(invoice), [invoice]);
+  const [visibleMessages, setVisibleMessages] = useState<any[]>([]);
+
+  useEffect(() => {
+    setVisibleMessages([]);
+    let current = 0;
+    const interval = setInterval(() => {
+      if (current < allMessages.length) {
+        setVisibleMessages(prev => [...prev, allMessages[current]]);
+        current++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 600);
+    return () => clearInterval(interval);
+  }, [allMessages]);
 
   return (
     <AnimatePresence>
@@ -181,6 +271,40 @@ export default function InvoiceDetailModal({
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Live Agent Chat Discussion */}
+          <div className="mb-6 p-4 rounded-xl bg-white/5 border border-border/20 space-y-3 no-print">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-cyan-glow font-bold uppercase tracking-wider">
+                🤖 Agent Auditing Room
+              </span>
+              <span className="text-[9px] text-muted-foreground animate-pulse">
+                {visibleMessages.length < 4 ? "Agents analyzing..." : "Analysis complete"}
+              </span>
+            </div>
+            
+            <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
+              {visibleMessages.map((msg, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex items-start gap-2.5 p-2.5 rounded-lg border ${msg.bg}`}
+                >
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold bg-white/10 ${msg.color}`}>
+                    {msg.avatar}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[10px] font-bold ${msg.color}`}>{msg.sender}</span>
+                    </div>
+                    <p className="text-xs text-foreground/80 leading-normal mt-0.5 font-medium">{msg.text}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
           {/* Approval Info */}
