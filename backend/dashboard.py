@@ -629,12 +629,26 @@ def calculate_roi():
 
 @app.route("/api/debug")
 def debug_env():
+    import base64
+    import yaml
+    
+    b64_err = "None"
+    config = None
+    try:
+        b64_config = os.getenv("AGENT_CONFIG_B64")
+        if b64_config:
+            config = yaml.safe_load(base64.b64decode(b64_config).decode("utf-8"))
+    except Exception as e:
+        b64_err = str(e)
+        
     return jsonify({
         "OPENAI_API_KEY": bool(os.getenv("OPENAI_API_KEY")),
+        "CLOUDINARY_URL": bool(os.getenv("CLOUDINARY_URL")),
         "BAND_ROOM_ID": bool(os.getenv("BAND_ROOM_ID")),
         "BAND_BOT_TOKEN": bool(os.getenv("BAND_BOT_TOKEN")),
         "AGENT_CONFIG_B64": bool(os.getenv("AGENT_CONFIG_B64")),
-        "AGENT_YAML_EXISTS": os.path.exists("agent_config.yaml")
+        "B64_DECODE_ERR": b64_err,
+        "CONFIG_PARSED": config is not None
     })
 
 @app.route("/api/metrics")
