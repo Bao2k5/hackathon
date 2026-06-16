@@ -651,6 +651,31 @@ def debug_env():
         "CONFIG_PARSED": config is not None
     })
 
+@app.route("/api/test-band")
+def test_band():
+    import base64
+    import yaml
+    from thenvoi_rest import RestClient, ChatMessageRequest, ChatMessageRequestMentionsItem
+    
+    room_id = os.getenv("BAND_ROOM_ID", "")
+    b64_config = os.getenv("AGENT_CONFIG_B64", "")
+    
+    try:
+        config = yaml.safe_load(base64.b64decode(b64_config).decode("utf-8"))
+        agent_key = config["approval_notifier"]["api_key"]
+        
+        client = RestClient(api_key=agent_key, base_url="https://app.band.ai")
+        client.agent_api_messages.create_agent_chat_message(
+            chat_id=room_id,
+            message=ChatMessageRequest(
+                content="Hello from Railway! If you see this, the connection is working.",
+                mentions=[]
+            )
+        )
+        return jsonify({"success": True, "message": "Triggered successfully!"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e), "room_id_length": len(room_id)})
+
 @app.route("/api/metrics")
 def business_metrics():
     """Business intelligence metrics dashboard."""
