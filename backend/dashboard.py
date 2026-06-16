@@ -582,22 +582,14 @@ def _trigger_band(expense_result: dict, data: dict, receipt_url: str = None):
 
 @app.route("/api/expenses")
 def list_expenses():
-    conn = db.get_conn()
-    rows = conn.execute(
-        "SELECT * FROM expenses ORDER BY created_at DESC LIMIT 50"
-    ).fetchall()
-    conn.close()
-    return jsonify([dict(r) for r in rows])
+    rows = db._execute("SELECT * FROM expenses ORDER BY created_at DESC LIMIT 50", fetch="all")
+    return jsonify(rows)
 
 
 @app.route("/api/history")
 def list_history():
-    conn = db.get_conn()
-    rows = conn.execute(
-        "SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 100"
-    ).fetchall()
-    conn.close()
-    return jsonify([dict(r) for r in rows])
+    rows = db._execute("SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 100", fetch="all")
+    return jsonify(rows)
 
 
 @app.route("/api/departments")
@@ -608,10 +600,7 @@ def list_departments():
 @app.route("/api/roi")
 def calculate_roi():
     """Calculate ROI: AI automation vs manual processing."""
-    conn = db.get_conn()
-    expenses = conn.execute("SELECT * FROM expenses").fetchall()
-    conn.close()
-    
+    expenses = db._execute("SELECT * FROM expenses", fetch="all")
     total_requests = len(expenses)
     # Manual processing: avg 5 days @ $50/hour = $2000 per request
     # AI processing: 20 seconds @ $0.01 per request
@@ -688,34 +677,32 @@ def test_band():
 @app.route("/api/metrics")
 def business_metrics():
     """Business intelligence metrics dashboard."""
-    conn = db.get_conn()
-    
     # Overall stats
-    total = conn.execute("SELECT COUNT(*) FROM expenses").fetchone()[0]
-    approved = conn.execute("SELECT COUNT(*) FROM expenses WHERE status='APPROVED'").fetchone()[0]
-    rejected = conn.execute("SELECT COUNT(*) FROM expenses WHERE status='REJECTED'").fetchone()[0]
-    pending = conn.execute("SELECT COUNT(*) FROM expenses WHERE status IN ('PENDING', 'ESCALATED')").fetchone()[0]
+    total = db._execute("SELECT COUNT(*) as count FROM expenses", fetch="one")["count"]
+    approved = db._execute("SELECT COUNT(*) as count FROM expenses WHERE status='APPROVED'", fetch="one")["count"]
+    rejected = db._execute("SELECT COUNT(*) as count FROM expenses WHERE status='REJECTED'", fetch="one")["count"]
+    pending = db._execute("SELECT COUNT(*) as count FROM expenses WHERE status IN ('PENDING', 'ESCALATED')", fetch="one")["count"]
     
     # Approval rate by department
-    dept_stats = conn.execute("""
+    dept_stats = db._execute("""
         SELECT department_name, 
                COUNT(*) as total,
                SUM(CASE WHEN status='APPROVED' THEN 1 ELSE 0 END) as approved,
                SUM(amount) as total_amount
         FROM expenses 
         GROUP BY department_name
-    """).fetchall()
+    """, fetch="all")
     
     # Risk distribution
-    risk_dist = conn.execute("""
+    risk_dist = db._execute("""
         SELECT risk_level, COUNT(*) as count
         FROM expenses 
         WHERE risk_level IS NOT NULL
         GROUP BY risk_level
-    """).fetchall()
+    """, fetch="all")
     
     # Top spending categories
-    category_stats = conn.execute("""
+    category_stats = db._execute("""
         SELECT category, 
                COUNT(*) as count,
                SUM(amount) as total_spending
@@ -724,9 +711,7 @@ def business_metrics():
         GROUP BY category
         ORDER BY total_spending DESC
         LIMIT 5
-    """).fetchall()
-    
-    conn.close()
+    """, fetch="all")
     
     return jsonify({
         "overview": {
@@ -736,9 +721,9 @@ def business_metrics():
             "pending": pending,
             "approval_rate": round(approved / total * 100, 1) if total > 0 else 0
         },
-        "by_department": [dict(r) for r in dept_stats],
-        "risk_distribution": [dict(r) for r in risk_dist],
-        "top_categories": [dict(r) for r in category_stats]
+        "by_department": dept_stats,
+        "risk_distribution": risk_dist,
+        "top_categories": category_stats
     })
 
 
