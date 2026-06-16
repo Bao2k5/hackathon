@@ -140,7 +140,12 @@ def create_band_agent(agent_key: str, tools: list, system_prompt: str):
     from band.adapters import LangGraphAdapter
     from band.config import load_agent_config
 
-    agent_id, api_key = load_agent_config(agent_key)
+    # Read agent credentials directly from our loaded CONFIG (supports B64)
+    agent_info = CONFIG.get(agent_key)
+    if not agent_info:
+        raise ValueError(f"Agent {agent_key} not found in configuration.")
+    agent_id = agent_info["agent_id"]
+    api_key = agent_info["api_key"]
 
     # Multi-Model Routing:
     # - policy_checker  → Featherless (Qwen2.5) for Featherless sponsor prize track
