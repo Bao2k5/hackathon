@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, FileText, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { X, FileText, ExternalLink, CheckCircle2, AlertTriangle, Printer } from 'lucide-react';
 import type { Invoice, UserRole } from '../types';
 import { formatCurrency, formatDate, formatRelativeTime } from '../utils/format';
 
@@ -43,12 +43,21 @@ export default function InvoiceDetailModal({
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative glass rounded-2xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-border/30 z-10"
+          className="relative glass rounded-2xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-border/30 z-10 print-modal"
         >
+          {/* Print */}
+          <button
+            onClick={() => window.print()}
+            className="absolute top-4 right-12 p-1.5 rounded-lg text-foreground/50 hover:text-foreground hover:bg-white/5 transition-all-200 cursor-pointer no-print"
+            title="Print Invoice"
+          >
+            <Printer size={18} />
+          </button>
+
           {/* Close */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1.5 rounded-lg text-foreground/50 hover:text-foreground hover:bg-white/5 transition-all-200 cursor-pointer"
+            className="absolute top-4 right-4 p-1.5 rounded-lg text-foreground/50 hover:text-foreground hover:bg-white/5 transition-all-200 cursor-pointer no-print"
           >
             <X size={18} />
           </button>
@@ -204,7 +213,7 @@ export default function InvoiceDetailModal({
           )}
 
           {/* Receipt link & Action buttons */}
-          <div className="flex items-center justify-between gap-4 mt-6 pt-4 border-t border-border/20 flex-wrap">
+          <div className="flex items-center justify-between gap-4 mt-6 pt-4 border-t border-border/20 flex-wrap no-print">
             {invoice.receiptUrl ? (
               <a
                 href={invoice.receiptUrl}
