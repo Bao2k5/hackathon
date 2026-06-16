@@ -25,8 +25,9 @@ COPY --from=frontend-builder /app/dashboard-ui/dist ./dashboard-ui/dist
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Expose ports (dashboard on 5000)
-EXPOSE 5000
+# Expose ports (dashboard on 8000)
+EXPOSE 8000
 
-# Default command (can be overridden in docker-compose.yml)
-CMD ["python", "backend/dashboard.py"]
+# Make start script executable and run it
+RUN chmod +x start.sh
+CMD ["/bin/sh", "start.sh"]
