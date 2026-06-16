@@ -24,7 +24,7 @@ services:
   dashboard:
     build: .
     container_name: expenseai-dashboard
-    command: gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 120 dashboard:app
+    command: gunicorn --chdir backend --bind 0.0.0.0:5000 --workers 2 --timeout 120 dashboard:app
     environment:
       DATABASE_URL: postgresql://expenseai:${POSTGRES_PASSWORD:-changeme123}@postgres:5432/expense_approval
       OPENAI_API_KEY: ${OPENAI_API_KEY}
@@ -47,7 +47,7 @@ services:
   agents:
     build: .
     container_name: expenseai-agents
-    command: python main.py
+    command: python backend/main.py
     environment:
       DATABASE_URL: postgresql://expenseai:${POSTGRES_PASSWORD:-changeme123}@postgres:5432/expense_approval
       OPENAI_API_KEY: ${OPENAI_API_KEY}

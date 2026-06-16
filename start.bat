@@ -12,12 +12,12 @@ echo.
 cd /d "%~dp0"
 
 echo  [1/2] Starting AI Agents (Budget, Policy, Risk, Approval)...
-start "ExpenseAI -- Agents" cmd /k "cd /d %~dp0 && python main.py"
+start "ExpenseAI -- Agents" cmd /k "cd /d %~dp0 && python backend\main.py"
 
 timeout /t 3 /nobreak > nul
 
 echo  [2/2] Starting Web Dashboard...
-start "ExpenseAI -- Dashboard" cmd /k "cd /d %~dp0 && python dashboard.py"
+start "ExpenseAI -- Dashboard" cmd /k "cd /d %~dp0 && python backend\dashboard.py"
 
 timeout /t 2 /nobreak > nul
 

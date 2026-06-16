@@ -310,10 +310,10 @@ Double-click: start.bat
 **Manual:**
 ```bash
 # Terminal 1 — AI Agents
-python main.py
+python backend/main.py
 
 # Terminal 2 — Dashboard
-python dashboard.py   # → http://localhost:5000
+python backend/dashboard.py   # → http://localhost:5000
 ```
 
 ---
@@ -407,14 +407,20 @@ python compliance_report.py
 
 ```
 .
-├── main.py           # 4 Band agents + auto-restart logic
-├── dashboard.py      # Flask web dashboard
-├── tools.py          # LangChain @tool definitions (12 tools)
-├── db.py             # SQLite layer (departments, expenses, audit_logs)
-├── demo.py           # Automated demo runner
-├── start.bat         # One-click Windows launcher
-├── agent_config.yaml # Agent credentials
-└── .env              # API keys
+├── backend/
+│   ├── main.py           # 4 Band agents + auto-restart logic
+│   ├── dashboard.py      # Flask web dashboard
+│   ├── tools.py          # LangChain @tool definitions (12 tools)
+│   ├── db.py             # SQLite/PostgreSQL layer
+│   └── demo.py           # Automated demo runner (local only, gitignored)
+├── dashboard-ui/          # React + TypeScript frontend (Vite)
+├── Dockerfile
+├── docker-compose.yml
+├── railway.toml
+├── requirements.txt
+├── start.bat              # One-click Windows launcher
+├── agent_config.yaml      # Agent credentials (local only, gitignored)
+└── .env                   # API keys (local only, gitignored)
 ```
 
 ---

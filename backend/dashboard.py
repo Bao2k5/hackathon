@@ -7,14 +7,17 @@ import sqlite3
 from flask import Flask, render_template_string, request, jsonify
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"), override=True)
+# Project root is one level up from this file (backend/dashboard.py -> repo root)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"), override=True)
 
 import db
 db.init_db()
 
 app = Flask(
     __name__,
-    static_folder=os.path.join(os.path.dirname(__file__), "dashboard-ui", "dist"),
+    static_folder=os.path.join(PROJECT_ROOT, "dashboard-ui", "dist"),
     static_url_path=""
 )
 
@@ -514,7 +517,7 @@ def _trigger_band(expense_result: dict, data: dict):
     # Load agent config to use approval_notifier API key for sending messages
     # This avoids the "Human API requires Enterprise plan" restriction.
     try:
-        config_path = os.path.join(os.path.dirname(__file__), "agent_config.yaml")
+        config_path = os.path.join(PROJECT_ROOT, "agent_config.yaml")
         with open(config_path) as f:
             config = yaml.safe_load(f)
         agent_key = config["approval_notifier"]["api_key"]
@@ -703,7 +706,7 @@ def _send_override_notification(expense_id: str, action: str):
     if not room_id:
         return
     try:
-        config_path = os.path.join(os.path.dirname(__file__), "agent_config.yaml")
+        config_path = os.path.join(PROJECT_ROOT, "agent_config.yaml")
         with open(config_path) as f:
             config = yaml.safe_load(f)
         agent_key = config["approval_notifier"]["api_key"]

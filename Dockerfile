@@ -25,4 +25,4 @@ USER appuser
 EXPOSE 5000
 
 # Default command (can be overridden in docker-compose.yml)
-CMD ["python", "dashboard.py"]
+CMD ["python", "backend/dashboard.py"]

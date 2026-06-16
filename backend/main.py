@@ -24,7 +24,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("expense_system")
 
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"), override=True)
+# Project root is one level up from this file (backend/main.py -> repo root)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"), override=True)
 
 import db
 db.init_db()
@@ -43,7 +46,7 @@ OPENAI_API_KEY  = os.getenv("OPENAI_API_KEY", "")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME      = os.getenv("MODEL_NAME", "gpt-4o-mini")
 
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), "agent_config.yaml")
+CONFIG_PATH = os.path.join(PROJECT_ROOT, "agent_config.yaml")
 with open(CONFIG_PATH) as f:
     CONFIG = yaml.safe_load(f)
 
