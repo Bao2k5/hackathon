@@ -25,8 +25,8 @@ COPY --from=frontend-builder /app/dashboard-ui/dist ./dashboard-ui/dist
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Expose ports (dashboard on 8000)
-EXPOSE 8000
+# Expose ports (dashboard on 5000)
+EXPOSE 5000
 
 # Start both AI Agents in background and Web Dashboard in foreground
-CMD ["/bin/sh", "-c", "cd backend && python main.py & cd backend && gunicorn --bind 0.0.0.0:8000 dashboard:app"]
+CMD ["/bin/sh", "-c", "cd backend && python main.py & cd backend && gunicorn --bind 0.0.0.0:${PORT:-5000} dashboard:app"]
