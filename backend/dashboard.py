@@ -605,6 +605,15 @@ def calculate_roi():
         "roi_percentage": round((savings / manual_cost * 100), 1) if manual_cost > 0 else 0
     })
 
+@app.route("/api/debug")
+def debug_env():
+    return jsonify({
+        "OPENAI_API_KEY": bool(os.getenv("OPENAI_API_KEY")),
+        "BAND_ROOM_ID": bool(os.getenv("BAND_ROOM_ID")),
+        "BAND_BOT_TOKEN": bool(os.getenv("BAND_BOT_TOKEN")),
+        "AGENT_CONFIG_B64": bool(os.getenv("AGENT_CONFIG_B64")),
+        "AGENT_YAML_EXISTS": os.path.exists("agent_config.yaml")
+    })
 
 @app.route("/api/metrics")
 def business_metrics():
