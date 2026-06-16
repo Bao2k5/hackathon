@@ -28,6 +28,5 @@ USER appuser
 # Expose ports (dashboard on 8000)
 EXPOSE 8000
 
-# Make start script executable and run it
-RUN chmod +x start.sh
-CMD ["/bin/sh", "start.sh"]
+# Start both AI Agents in background and Web Dashboard in foreground
+CMD ["/bin/sh", "-c", "python backend/main.py & gunicorn --bind 0.0.0.0:8000 backend.dashboard:app"]
