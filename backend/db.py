@@ -187,7 +187,7 @@ def _execute(query: str, params: tuple = (), fetch: str = None, commit: bool = T
 # ── Expense operations ────────────────────────────────────────────────────────
 
 def create_expense(requester: str, amount: float, department_id: int,
-                   category: str, vendor: str, description: str) -> dict:
+                   category: str, vendor: str, description: str, receipt_url: str = None) -> dict:
     dept = _execute("SELECT * FROM departments WHERE id=?", (department_id,), fetch="one")
     if not dept:
         raise ValueError(f"Department {department_id} not found")
@@ -212,10 +212,10 @@ def create_expense(requester: str, amount: float, department_id: int,
     _execute("""
         INSERT INTO expenses
         (id, requester, amount, department_id, department_name, category, vendor,
-         description, status, note, created_at, updated_at)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+         description, status, note, receipt_url, created_at, updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
     """, (expense_id, requester, amount, department_id, dept["name"],
-          category, vendor, description, "PENDING", note, now, now))
+          category, vendor, description, "PENDING", note, receipt_url, now, now))
 
     return {
         "expense_id": expense_id,
