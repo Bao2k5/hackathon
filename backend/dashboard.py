@@ -7,8 +7,11 @@ import sqlite3
 from flask import Flask, render_template_string, request, jsonify
 from dotenv import load_dotenv
 
+import sys
 # Project root is one level up from this file (backend/dashboard.py -> repo root)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(PROJECT_ROOT)
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"), override=True)
 
@@ -669,7 +672,11 @@ def test_band():
             chat_id=room_id,
             message=ChatMessageRequest(
                 content="Hello from Railway! If you see this, the connection is working.",
-                mentions=[]
+                mentions=[
+                    ChatMessageRequestMentionsItem(
+                        id="9364e570-dba7-44a1-ba26-561ed93a2209"
+                    )
+                ]
             )
         )
         return jsonify({"success": True, "message": "Triggered successfully!"})

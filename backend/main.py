@@ -24,8 +24,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger("expense_system")
 
+import sys
 # Project root is one level up from this file (backend/main.py -> repo root)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(PROJECT_ROOT)
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"), override=True)
 

@@ -29,4 +29,4 @@ USER appuser
 EXPOSE 5000
 
 # Start both AI Agents in background and Web Dashboard in foreground
-CMD ["/bin/sh", "-c", "cd backend && python main.py & cd backend && gunicorn --bind 0.0.0.0:${PORT:-5000} dashboard:app"]
+CMD ["/bin/sh", "-c", "python backend/main.py & gunicorn --chdir backend --bind 0.0.0.0:${PORT:-5000} dashboard:app"]
