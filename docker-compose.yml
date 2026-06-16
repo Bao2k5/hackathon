@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: expenseai-db
+    environment:
+      POSTGRES_DB: expense_approval
+      POSTGRES_USER: expenseai
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U expenseai" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Dashboard Web UI
+  dashboard:
+    build: .
+    container_name: expenseai-dashboard
+    command: gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 120 dashboard:app
+    environment:
+      DATABASE_URL: postgresql://expenseai:${POSTGRES_PASSWORD:-changeme123}@postgres:5432/expense_approval
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.aimlapi.com/v1}
+      MODEL_NAME: ${MODEL_NAME:-gpt-4o-mini}
+      BAND_ROOM_ID: ${BAND_ROOM_ID}
+      BAND_BOT_TOKEN: ${BAND_BOT_TOKEN}
+      FEATHERLESS_API_KEY: ${FEATHERLESS_API_KEY:-}
+      FEATHERLESS_BASE_URL: ${FEATHERLESS_BASE_URL:-https://api.featherless.ai/v1}
+      FEATHERLESS_MODEL: ${FEATHERLESS_MODEL:-Qwen/Qwen2.5-72B-Instruct}
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # AI Agents (4 Band agents)
+  agents:
+    build: .
+    container_name: expenseai-agents
+    command: python main.py
+    environment:
+      DATABASE_URL: postgresql://expenseai:${POSTGRES_PASSWORD:-changeme123}@postgres:5432/expense_approval
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.aimlapi.com/v1}
+      MODEL_NAME: ${MODEL_NAME:-gpt-4o-mini}
+      BAND_ROOM_ID: ${BAND_ROOM_ID}
+      BAND_BOT_TOKEN: ${BAND_BOT_TOKEN}
+      FEATHERLESS_API_KEY: ${FEATHERLESS_API_KEY:-}
+      FEATHERLESS_BASE_URL: ${FEATHERLESS_BASE_URL:-https://api.featherless.ai/v1}
+      FEATHERLESS_MODEL: ${FEATHERLESS_MODEL:-Qwen/Qwen2.5-72B-Instruct}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      dashboard:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    name: expenseai-network

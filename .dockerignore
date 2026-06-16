@@ -1,0 +1,49 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Local SQLite (Docker uses PostgreSQL)
+*.db
+
+# Logs
+*.log
+*_log.txt
+
+# Environment files (use docker-compose environment instead)
+.env
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+scratch/
+*.tmp
+
+# Node modules (dashboard-ui)
+dashboard-ui/node_modules/
+dashboard-ui/dist/
+
+# Documentation
+*.md
+!README.md
+
+# Test files
+stress_test.py
+demo.py
+compliance_report.py

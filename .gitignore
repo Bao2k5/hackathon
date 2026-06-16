@@ -1,0 +1,96 @@
+# ========================================
+# SECRETS - NEVER COMMIT!
+# ========================================
+.env
+agent_config.yaml
+
+# ========================================
+# Python
+# ========================================
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.Python
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# ========================================
+# Databases (Local SQLite only, Docker uses PostgreSQL)
+# ========================================
+*.db
+*.sqlite3
+expense_approval.db
+
+# ========================================
+# Logs (Generated at runtime)
+# ========================================
+*.log
+*_log.txt
+dashboard_log.txt
+main_log.txt
+compliance_report.txt
+
+# ========================================
+# Node / Frontend Build Artifacts
+# ========================================
+dashboard-ui/node_modules/
+dashboard-ui/dist/
+dashboard-ui/.vite/
+
+# ========================================
+# IDE & OS
+# ========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ========================================
+# Documentation & Analysis (Not needed in production)
+# ========================================
+DEMO_SCRIPT.md
+SLIDE_DECK_CONTENT.md
+DOCKER_DEPLOYMENT.md
+*.docx
+band_of_agents_hackathon.md
+hackathon.docx
+project_architecture_roadmap.docx
+
+# ========================================
+# AIDLC Workflow Framework (Local reference only)
+# ========================================
+.kiro/
+aidlc-workflows/
+
+# ========================================
+# Development Tools (Not needed in production)
+# ========================================
+scratch/
+stress_test.py
+demo.py
+compliance_report.py
+*.tmp
+*.bak
+
+# ========================================
+# Internal Documentation (Not for public repo)
+# ========================================
+ANALYSIS_AND_OPTIMIZATION_PLAN.md
+IMPROVEMENTS_COMPLETED.md
+DOCKER_IMPROVEMENTS.md
+DEMO_SCRIPT.md
+SLIDE_DECK_CONTENT.md
+DOCKER_DEPLOYMENT.md
+
+# ========================================
+# Old Agent Files (Not used in main.py)
+# ========================================
+agents/
