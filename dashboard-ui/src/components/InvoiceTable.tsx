@@ -14,6 +14,7 @@ import type {
   FilterState,
   SortField,
   SortDirection,
+  UserRole,
 } from '../types';
 import { formatCurrency, formatDate } from '../utils/format';
 import InvoiceDetailModal from './InvoiceDetailModal';

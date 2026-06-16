@@ -125,7 +125,7 @@ export default function AITimeline({ history }: AITimelineProps) {
 
                 {/* Decision chain */}
                 <div className="space-y-2">
-                  {sortedDecisions.map((decision, dIdx) => {
+                  {sortedDecisions.map((decision) => {
                     const cfg = actionConfig[decision.action] || actionConfig.flag;
                     const agentColor = agentColors[decision.agent];
 

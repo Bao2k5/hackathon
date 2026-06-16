@@ -197,7 +197,7 @@ export default function App() {
           />
         );
       case 'ai-timeline':
-        return <AITimelinePage role={role} history={history} />;
+        return <AITimelinePage history={history} />;
       default:
         return <DashboardPage role={role} invoices={invoices} history={history} />;
     }

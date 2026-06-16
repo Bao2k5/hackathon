@@ -5,7 +5,6 @@ import type {
   Invoice,
   AIDecision,
   InvoiceStatus,
-  AIAgent,
   ApprovalAction,
 } from '../types';
 
@@ -97,12 +96,7 @@ const vendors = [
   'Monday.com',
 ];
 
-/* ── AI Agents ── */
-const aiAgents: { id: AIAgent; label: string }[] = [
-  { id: 'auto_approver', label: 'Auto-Approver Alpha' },
-  { id: 'risk_analyzer', label: 'Risk Analyzer Beta' },
-  { id: 'fraud_detector', label: 'Fraud Detector Gamma' },
-];
+
 
 const aiFlagList = [
   'Amount exceeds department average by >50%',
@@ -156,8 +150,6 @@ export const invoices: Invoice[] = Array.from({ length: 150 }, (_, i) => {
 /* ── AI Decisions (audit trail) ── */
 export const aiHistory: AIDecision[] = invoices.flatMap((inv) => {
   const decisions: AIDecision[] = [];
-  const agents = [...aiAgents];
-
   // Auto-Approver always runs first
   const aaAction: ApprovalAction = faker.number.float() < 0.6 ? 'approve' : 'flag';
   decisions.push({

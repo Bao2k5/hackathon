@@ -139,7 +139,7 @@ export default function DashboardPage({ role, invoices, history }: DashboardPage
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {cardData.map((card, i) => (
+        {cardData.map((card) => (
           <MetricCard key={card.label} {...card} />
         ))}
       </div>

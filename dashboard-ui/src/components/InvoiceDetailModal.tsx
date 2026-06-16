@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, FileText, ExternalLink, Clock, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { X, FileText, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
 import type { Invoice, UserRole } from '../types';
 import { formatCurrency, formatDate, formatRelativeTime } from '../utils/format';
 

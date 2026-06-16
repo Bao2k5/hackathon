@@ -3,7 +3,7 @@ import { Bot } from 'lucide-react';
 import AITimeline from '../components/AITimeline';
 import type { AIDecision } from '../types';
 
-export default function AITimelinePage({ role, history }: { role?: string; history: AIDecision[] }) {
+export default function AITimelinePage({ history }: { history: AIDecision[] }) {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
